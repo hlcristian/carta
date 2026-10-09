@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para mi princesa</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-top: #2c100c;
+            --bg-bottom: #0f0502;
+            --envelope-color: #d4a373;
+            --envelope-dark: #b88655;
+            --envelope-flap: #e6b88a;
+            --paper: #fdf6e3;
+            --text-color: #3e2011;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
+            min-height: 100vh;
+            overflow: hidden; /* Evitar scroll en el fondo */
+            font-family: 'Caveat', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+        }
+
+        /* ----- CONTENEDORES MÁGICOS (Hojas y Luciérnagas) ----- */
+        #particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Hojas de otoño */
+        .leaf {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            /* Forma de hoja usando border-radius */
+            border-radius: 15px 0 15px 0;
+            opacity: 0.8;
+            animation: fall linear infinite, sway ease-in-out infinite alternate;
+        }
+
+        @keyframes fall {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+
+        @keyframes sway {
+            0% { transform: translateX(0px) rotate(0deg); }
+            100% { transform: translateX(100px) rotate(180deg); }
+        }
+
+        /* Luciérnagas */
+        .firefly {
+            position: absolute;
+            bottom: -30px; /* Inician un poquito por debajo de la pantalla */
+            width: 8px; /* Más grandes */
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ffffff; /* Centro súper brillante */
+            box-shadow: 0 0 15px 6px #ffeb3b, 0 0 30px 12px #ff9800; /* Resplandor dorado/naranja */
+            animation: floatUpFirefly linear infinite;
+            z-index: 2; /* Siempre por encima del fondo */
+        }
+
+        @keyframes floatUpFirefly {
+            0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+            10% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(-115vh) translateX(80px); opacity: 0; }
+        }
+
+        /* ----- SOBRE Y ANIMACIÓN ----- */
+        #envelope-container {
+            position: relative;
+            z-index: 10;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+            animation: pulse 2s infinite alternate;
+        }
+
+        #envelope-container:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes pulse {
+            0% { filter: drop-shadow(0 0 10px rgba(255, 180, 50, 0.3)); }
+            100% { filter: drop-shadow(0 0 30px rgba(255, 180, 50, 0.7)); }
+        }
+
+        .envelope {
+            width: 320px;
+            height: 200px;
+            background-color: var(--envelope-color);
+            position: relative;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            border-radius: 5px;
+        }
+
+        /* Cara frontal del sobre */
+        .envelope::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-left: 160px solid var(--envelope-dark);
+            border-right: 160px solid var(--envelope-dark);
+            border-top: 100px solid transparent;
+            border-bottom: 100px solid var(--envelope-color);
+            border-radius: 0 0 5px 5px;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* Solapa superior */
+        .flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 110px solid var(--envelope-flap);
+            border-bottom: 110px solid transparent;
+            transform-origin: top;
+            transition: transform 1s ease-in-out;
+            z-index: 4;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+        }
+
+        /* Papel simulado asomando */
+        .paper-preview {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            height: 180px;
+            background: var(--paper);
+            z-index: 2;
+            transition: transform 1s ease-in-out, opacity 1s;
+            border-radius: 5px;
+        }
+
+        /* Etiqueta de instrucción */
+        .instruction {
+            position: absolute;
+            top: 100%; /* Se coloca exactamente debajo del sobre siempre */
+            left: 0;
+            width: 100%;
+            text-align: center;
+            margin-top: 35px; /* Espaciado perfecto y limpio */
+            color: #ffeb99;
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            pointer-events: none;
+            line-height: 1.4;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.9); /* Sombra oscura para que resalte sobre las luces */
+        }
+
+        /* Clases activas para la apertura */
+        .open .flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .open .paper-preview {
+            transform: translateY(-80px);
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: scale(0.8) translateY(-100px);
+            pointer-events: none;
+            transition: all 1.5s ease;
+        }
+
+        /* ----- LA CARTA REAL (Texto) ----- */
+        #letter-reader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 800px;
+            height: 85vh;
+            background: var(--paper);
+            z-index: 20;
+            border-radius: 8px;
+            padding: 40px 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), inset 0 0 40px rgba(212, 163, 115, 0.3);
+            display: none; /* Oculto al inicio */
+            opacity: 0;
+            overflow-y: auto;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 100% 35px; /* Líneas de cuaderno antiguo */
+            line-height: 35px;
+        }
+
+        #letter-reader::-webkit-scrollbar { width: 8px; }
+        #letter-reader::-webkit-scrollbar-thumb { background: #b88655; border-radius: 10px; }
+
+        .typewriter-text {
+            font-size: 1.6rem;
+            color: var(--text-color);
+            margin-bottom: 25px;
+            text-align: justify;
+            text-indent: 30px;
+        }
+
+        .title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #5c2710;
+        }
+
+        .signature {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            text-align: right;
+            margin-top: 30px;
+            color: #5c2710;
+        }
+
+        /* Cursor parpadeante */
+        .cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.2em;
+            background-color: var(--text-color);
+            vertical-align: middle;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @media (max-width: 600px) {
+            .envelope { width: 280px; height: 180px; }
+            .envelope::after { border-left: 140px solid var(--envelope-dark); border-right: 140px solid var(--envelope-dark); border-bottom: 90px solid var(--envelope-color); border-top: 90px solid transparent;}
+            .flap { border-left: 140px solid transparent; border-right: 140px solid transparent; border-top: 100px solid var(--envelope-flap); }
+            
+            #letter-reader { padding: 30px 25px; height: 90vh; line-height: 30px; background-size: 100% 30px; }
+            .typewriter-text { font-size: 1.35rem; }
+            .title { font-size: 2.2rem; margin-bottom: 15px;}
+            .signature { font-size: 2rem; margin-top: 20px;}
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Audio oculto -->
+    <audio id="bg-music" src="musica.mp3" loop></audio>
+
+    <!-- Partículas del fondo -->
+    <div id="particles-container"></div>
+
+    <!-- Sobre Mágico -->
+    <div id="envelope-container">
+        <div class="envelope" id="envelope">
+            <div class="paper-preview"></div>
+            <div class="flap"></div>
+        </div>
+        <div class="instruction">
+            Para mi Celeste.<br>
+            Toca el sobre ✨
+        </div>
+    </div>
+
+    <!-- Carta Real (Lectura) -->
+    <div id="letter-reader">
+        <h1 class="title" id="letter-title"></h1>
+        <div id="letter-body">
+            <!-- Los párrafos se generarán aquí con JS -->
+        </div>
+        <div class="signature" id="letter-signature"></div>
+    </div>
+
+    <script>
+        // 1. Textos de la carta
+        const titleText = "Para mi princesa,";
+        
+        const paragraphs = [
+            "Hola, mi princesa. Solo quería decirte que me enamoré de la persona más inesperada, en el momento más inesperado. Es otro día más sin ti y acá me tienes nuevamente: pensándote, imaginándote y con unas ganas inmensas de que llegue ya el día en el que pueda abrazarte y verte. Quiero que mis ojos te miren para decirte que te amo profundamente y que me encanta lo hermosa que eres, aunque esa sea solo una de las muchísimas cualidades que me gustan de ti.",
+            
+            "Me encanta que te tome 30 minutos comerte una sola mandarina. Me gusta cuando susurras o hablas despacio mientras haces tus tareas. Me saca una sonrisa cuando suspiras o cuando me dices: 'Ay, Cristian'. Me encantan las palabras que utilizas: 'bueno', 'ah caray', 'sisisisisi', 'chistoso'. Me encanta cuando me dices que me quieres mucho, aunque en el fondo sé que yo te quiero más. Me da mucha ternura la forma en que me dices 'creo que me va a dar gripe', porque lo único que pienso en ese momento es en cuidarte y no dejar que nada malo te pase.",
+            
+            "Me encanta cuando te digo algo y te ríes, la manera tan dulce en la que dices las cosas y la paciencia con la que las explicas. Me encanta tu tierna sonrisa, me encanta tu sencillez, tu feminidad y tu forma única de ser. Admiro que, aunque no te guste el curso de Procesal Laboral, te esfuerzas y lo haces muy bien. Valoro muchísimo que, aunque tengas muchas tareas, siempre me des tu tiempo para hablar y me hagas sentir importante y especial en tu vida.",
+            
+            "Me encanta que te permitas emocionarte y alegrarte cada vez que te escribo. Me fascina que me digas que no sabes cómo expresarte en las cosas del amor, porque a mí me lo demuestras todos los días con tus acciones. Me genera muchísima paz y alegría saber que existes y que estás ahí. Me gusta cómo respondes a mis preguntas: tan sincera, amable, formal, expresiva y técnica. Y me da mucha risa que te tardes tanto en doblar tu ropa, pero me confieses que la desordenas en un solo minuto.",
+            
+            "Me encantas toda. No cambiaría absolutamente nada de ti... bueno, tal vez solamente el apellido cuando se dé la oportunidad. Quiero que seas la última persona con la que hable antes de dormirme por las noches. Por eso, recuerda esto: cuida de no enamorarte solo de quien abre las puertas de tu corazón, sino de quien tire las llaves y se encierre contigo.",
+            
+            "Te amo, mi Celeste."
+        ];
+
+        const signatureText = "Con todo el corazón,<br>Cristian Herrera";
+
+        // 2. Generación de Hojas y Luciérnagas
+        const particlesContainer = document.getElementById('particles-container');
+        const leafColors = ['#d35400', '#e67e22', '#f39c12', '#c0392b'];
+
+        // Crear 25 hojas
+        for (let i = 0; i < 25; i++) {
+            const leaf = document.createElement('div');
+            leaf.classList.add('leaf');
+            leaf.style.left = `${Math.random() * 100}vw`;
+            leaf.style.animationDuration = `${Math.random() * 5 + 5}s, ${Math.random() * 3 + 2}s`;
+            leaf.style.animationDelay = `${Math.random() * 5}s, 0s`;
+            leaf.style.backgroundColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+            particlesContainer.appendChild(leaf);
+        }
+
+        // Crear 50 luciérnagas (Más cantidad, resplandecientes y posiciones corregidas)
+        for (let i = 0; i < 50; i++) {
+            const firefly = document.createElement('div');
+            firefly.classList.add('firefly');
+            
+            // Posición horizontal aleatoria
+            firefly.style.left = `${Math.random() * 100}vw`;
+            
+            // Duración de subida (entre 6 y 14 segundos)
+            const duration = Math.random() * 8 + 6;
+            firefly.style.animationDuration = `${duration}s`;
+            
+            // Matemáticas corregidas: El delay negativo asegura que al cargar, 
+            // las luciérnagas ya estén dispersas a lo largo y ancho de la pantalla.
+            firefly.style.animationDelay = `-${Math.random() * duration}s`;
+            
+            particlesContainer.appendChild(firefly);
+        }
+
+        // 3. Lógica del Sobre y Máquina de Escribir
+        const envelopeContainer = document.getElementById('envelope-container');
+        const letterReader = document.getElementById('letter-reader');
+        const bgMusic = document.getElementById('bg-music');
+        
+        let isOpened = false;
+
+        envelopeContainer.addEventListener('click', () => {
+            if (isOpened) return;
+            isOpened = true;
+
+            // Reproducir música al tocar el sobre de forma segura
+            bgMusic.volume = 0.5;
+            const playPromise = bgMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Nota: Para escuchar música, asegúrate de guardar un archivo 'musica.mp3' en esta misma carpeta.", error);
+                });
+            }
+
+            // Animar el sobre abriéndose
+            envelopeContainer.classList.add('open');
+
+            // Después de 1.5s, desvanecer sobre y mostrar carta
+            setTimeout(() => {
+                envelopeContainer.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    envelopeContainer.style.display = 'none';
+                    letterReader.style.display = 'block';
+                    
+                    // Transición suave para la carta
+                    setTimeout(() => {
+                        letterReader.style.opacity = '1';
+                        letterReader.style.transform = 'translate(-50%, -50%) scale(1)';
+                        
+                        // Iniciar efecto de máquina de escribir
+                        startTypewriter();
+                    }, 50);
+                }, 1500);
+            }, 1500);
+        });
+
+        // 4. Función de Máquina de Escribir Asíncrona
+        async function startTypewriter() {
+            const speed = 35; // Milisegundos por letra (35 es un buen ritmo de lectura)
+            const titleElem = document.getElementById('letter-title');
+            const bodyElem = document.getElementById('letter-body');
+            const sigElem = document.getElementById('letter-signature');
+
+            // Función auxiliar para escribir
+            async function typeText(element, text, isHTML = false) {
+                return new Promise(resolve => {
+                    let i = 0;
+                    // Agregar cursor temporal
+                    const cursor = document.createElement('span');
+                    cursor.classList.add('cursor');
+                    element.appendChild(cursor);
+
+                    if(isHTML) {
+                        // Para la firma (contiene <br>) lo insertamos de golpe con fade
+                        cursor.remove();
+                        element.innerHTML = text;
+                        element.style.opacity = 0;
+                        element.style.transition = "opacity 2s ease";
+                        setTimeout(() => { element.style.opacity = 1; resolve(); }, 100);
+                        return;
+                    }
+
+                    const interval = setInterval(() => {
+                        // Insertar carácter justo antes del cursor
+                        const char = document.createTextNode(text.charAt(i));
+                        element.insertBefore(char, cursor);
+                        
+                        // Mantener el scroll abajo mientras escribe
+                        letterReader.scrollTop = letterReader.scrollHeight;
+                        
+                        i++;
+                        if (i >= text.length) {
+                            clearInterval(interval);
+                            cursor.remove(); // Quitar cursor al terminar el párrafo
+                            resolve();
+                        }
+                    }, speed);
+                });
+            }
+
+            // Escribir Título
+            await typeText(titleElem, titleText);
+            await new Promise(r => setTimeout(r, 800)); // Pausa dramática
+
+            // Escribir Párrafos uno por uno
+            for (let i = 0; i < paragraphs.length; i++) {
+                const p = document.createElement('p');
+                p.classList.add('typewriter-text');
+                bodyElem.appendChild(p);
+                
+                await typeText(p, paragraphs[i]);
+                await new Promise(r => setTimeout(r, 1000)); // Pausa entre párrafos
+            }
+
+            // Mostrar firma final
+            await new Promise(r => setTimeout(r, 500));
+            await typeText(sigElem, signatureText, true);
+        }
+    </script>
+</body>
+</html>
